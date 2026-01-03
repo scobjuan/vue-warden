@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "lint": "eslint --ext .js,.ts .",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "eslint-plugin-jsdoc": "^61.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0",
     "vite": "^7.2.4"
   }
 }
