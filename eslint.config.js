@@ -8,23 +8,28 @@ export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
-  eslintPluginPrettier,
+
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
-      },
-    },
+        projectService: true
+      }
+    }
   },
+
   {
-    ignores: ['node_modules/*', '**/*.config.js'],
+    ignores: ['node_modules/*', '**/*.config.js']
   },
+
   {
     plugins: {
-      jsdoc,
+      prettier: eslintPluginPrettier,
+      jsdoc
     },
     rules: {
+      ...eslintPluginPrettier.configs.recommended.rules,
       ...jsdoc.configs.recommended.rules,
+
       'jsdoc/check-indentation': 'error',
       'jsdoc/check-line-alignment': 'error',
       'jsdoc/check-syntax': 'error',
@@ -36,8 +41,6 @@ export default defineConfig(
       'jsdoc/require-jsdoc': [
         'error',
         {
-          checkGetters: false,
-          checkSetters: false,
           publicOnly: true,
           require: {
             ArrowFunctionExpression: true,
@@ -45,13 +48,13 @@ export default defineConfig(
             ClassExpression: true,
             FunctionDeclaration: true,
             FunctionExpression: true,
-            MethodDefinition: true,
-          },
-        },
+            MethodDefinition: true
+          }
+        }
       ],
       'jsdoc/require-throws': 'error',
       'jsdoc/sort-tags': 'error',
-      'jsdoc/tag-lines': 'off',
-    },
-  },
+      'jsdoc/tag-lines': 'off'
+    }
+  }
 )
