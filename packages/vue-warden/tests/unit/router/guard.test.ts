@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createApp, h } from 'vue'
+import { createApp, h, inject } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+import { WARDEN_KEY } from '../../../src/context'
 import type { RouterLike, WardenOptions } from '../../../src/core/types'
 import { createWarden } from '../../../src/plugin'
 import { routeKey } from '../../../src/router/guard'
@@ -27,7 +28,14 @@ function setup(overrides: Partial<WardenOptions> = {}, access = true) {
         component: Stub,
         meta: { warden: false }
       },
-      { path: '/forbidden', name: 'forbidden', component: Stub }
+      { path: '/forbidden', name: 'forbidden', component: Stub },
+      { path: '/denied', component: Stub },
+      {
+        path: '/marked',
+        name: 'marked',
+        component: Stub,
+        meta: { warden: true }
+      }
     ]
   })
   const fetchPermissions = vi.fn((key: string) =>
@@ -98,9 +106,85 @@ describe('navigation guard', () => {
   })
 
   it('supports a path as forbidden target', async () => {
-    const { router } = setup({ forbiddenRoute: '/nope' }, false)
-    await router.push('/users').catch(() => undefined)
-    expect(router.currentRoute.value.path).not.toBe('/users')
+    const { router } = setup({ forbiddenRoute: '/denied' }, false)
+    await router.push('/users')
+    expect(router.currentRoute.value.path).toBe('/denied')
+    expect(router.currentRoute.value.query.from).toBe('/users')
+  })
+
+  it('keeps the query string of the denied target in `from`', async () => {
+    const { router } = setup({ forbiddenRoute: 'forbidden' }, false)
+    await router.push('/users?tab=2')
+    expect(router.currentRoute.value.query.from).toBe('/users?tab=2')
+  })
+
+  it('does not loop when the forbidden route is given as a path', async () => {
+    const { router, fetchPermissions } = setup(
+      { forbiddenRoute: '/denied' },
+      false
+    )
+    await router.push('/denied')
+    expect(router.currentRoute.value.path).toBe('/denied')
+    expect(fetchPermissions).not.toHaveBeenCalled()
+  })
+
+  it('leaves no current page after landing on the forbidden route', async () => {
+    const { router, warden } = setup({ forbiddenRoute: 'forbidden' }, false)
+    await router.push('/users')
+    expect(warden.store.current.value).toBeUndefined()
+  })
+
+  it('only protects marked routes when protect is marked', async () => {
+    const { router, fetchPermissions } = setup({ protect: 'marked' })
+    await router.push('/users')
+    expect(fetchPermissions).not.toHaveBeenCalled()
+    await router.push('/marked')
+    expect(fetchPermissions).toHaveBeenCalledWith('marked', expect.anything())
+  })
+
+  it('does not call onDenied for allowed pages', async () => {
+    const onDenied = vi.fn()
+    const { router } = setup({ onDenied, forbiddenRoute: 'forbidden' })
+    await router.push('/users')
+    expect(onDenied).not.toHaveBeenCalled()
+  })
+
+  it('serves warm pages without waiting for the backend again', async () => {
+    const { router, fetchPermissions } = setup()
+    await router.push('/users')
+    await router.push('/')
+    await router.push('/users')
+    expect(fetchPermissions).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not redirect a denied navigation twice', async () => {
+    const onDenied = vi.fn()
+    const { router } = setup({ forbiddenRoute: 'forbidden', onDenied }, false)
+    await router.push('/users')
+    expect(onDenied).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps navigating when onDenied throws', async () => {
+    const onError = vi.fn()
+    const { router } = setup(
+      {
+        forbiddenRoute: 'forbidden',
+        onError,
+        onDenied: () => {
+          throw new Error('hook')
+        }
+      },
+      false
+    )
+    await router.push('/users')
+    expect(router.currentRoute.value.name).toBe('forbidden')
+    expect(onError).toHaveBeenCalled()
+  })
+
+  it('does not fetch for unnamed routes without meta', async () => {
+    const { router, fetchPermissions } = setup()
+    await router.push('/denied')
+    expect(fetchPermissions).not.toHaveBeenCalled()
   })
 
   it('does not loop on the forbidden route', async () => {
@@ -127,23 +211,6 @@ describe('navigation guard', () => {
     })
     await router.push('/users')
     expect(router.currentRoute.value.name).toBe('users')
-  })
-
-  it('redirects when a background refresh revokes the current page', async () => {
-    let access = true
-    const { router } = setup({
-      ttl: 0,
-      forbiddenRoute: 'forbidden',
-      fetchPermissions: () =>
-        Promise.resolve({ ...rawPage, can_access: access })
-    })
-    await router.push('/users')
-    access = false
-    await router.push('/')
-    await router.push('/users')
-    await vi.waitFor(() => {
-      expect(router.currentRoute.value.name).toBe('forbidden')
-    })
   })
 })
 
@@ -178,7 +245,115 @@ describe('createWarden', () => {
     expect(() => createApp(Stub).use(warden)).not.toThrow()
   })
 
+  it('provides the instance and registers components and the directive', () => {
+    const warden = createWarden({ fetchPermissions: () => Promise.resolve({}) })
+    const app = createApp(Stub)
+    app.use(warden)
+    expect(app.runWithContext(() => inject(WARDEN_KEY))).toBe(warden)
+    for (const name of ['Warden', 'WardenField', 'WardenGate']) {
+      expect(app.component(name)).toBeDefined()
+    }
+    expect(app.directive('warden')).toBeDefined()
+  })
+
+  it('keeps state per instance so two apps never share permissions', async () => {
+    const a = createWarden({ fetchPermissions: () => Promise.resolve(rawPage) })
+    const b = createWarden({ fetchPermissions: () => Promise.resolve(rawPage) })
+    await a.store.load('users')
+    expect(a.store.pages.has('users')).toBe(true)
+    expect(b.store.pages.has('users')).toBe(false)
+  })
+
+  it('moves the guard when attached to a different router', async () => {
+    const first = setup()
+    const second = setup()
+    first.warden.attachRouter(second.router as unknown as RouterLike)
+    await first.router.push('/users')
+    expect(first.fetchPermissions).not.toHaveBeenCalled()
+    await second.router.push('/users')
+    expect(first.warden.store.current.value).toBe('users')
+  })
+
   it('rejects missing fetchers early', () => {
     expect(() => createWarden({} as never)).toThrow(TypeError)
+  })
+})
+
+describe('revocation', () => {
+  function revocable(overrides: Partial<WardenOptions> = {}) {
+    const state = { access: true }
+    const ctx = setup({
+      ttl: 0,
+      fetchPermissions: (key: string) =>
+        Promise.resolve({
+          ...rawPage,
+          key,
+          can_access: key === 'users' ? state.access : true
+        }),
+      ...overrides
+    })
+    return { ...ctx, state }
+  }
+
+  it('redirects to the forbidden route when a refresh revokes the current page', async () => {
+    const { router, state } = revocable({ forbiddenRoute: 'forbidden' })
+    await router.push('/users')
+    state.access = false
+    await router.push('/')
+    expect(router.currentRoute.value.name).toBe('home')
+    await router.push('/users')
+    await vi.waitFor(() => {
+      expect(router.currentRoute.value.name).toBe('forbidden')
+    })
+  })
+
+  it('notifies onDenied with kind page when a refresh revokes access', async () => {
+    const onDenied = vi.fn()
+    const { router, state } = revocable({ onDenied })
+    await router.push('/users')
+    state.access = false
+    await router.push('/')
+    await router.push('/users')
+    await vi.waitFor(() => {
+      expect(onDenied).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'page', target: 'users' })
+      )
+    })
+  })
+
+  it('does not redirect when there is no forbidden route', async () => {
+    const { router, state, warden } = revocable()
+    await router.push('/users')
+    state.access = false
+    await router.push('/')
+    await router.push('/users')
+    await vi.waitFor(() => {
+      expect(warden.store.pages.get('users')?.access).toBe(false)
+    })
+    expect(router.currentRoute.value.name).toBe('users')
+  })
+
+  it('does not redirect when the revoked page is no longer the current one', async () => {
+    const { router, state, warden } = revocable({ forbiddenRoute: 'forbidden' })
+    await router.push('/users')
+    await router.push('/')
+    state.access = false
+    await router.push('/users')
+    await router.push('/')
+    await new Promise((r) => setTimeout(r, 20))
+    expect(warden.store.pages.get('users')?.access).toBe(false)
+    expect(router.currentRoute.value.name).toBe('home')
+  })
+
+  it('reports the current location in `from` when redirecting', async () => {
+    const { router, state } = revocable({ forbiddenRoute: 'forbidden' })
+    await router.push('/users?tab=1')
+    state.access = false
+    await router.push('/')
+    await router.push('/users?tab=1')
+    await vi.waitFor(() => {
+      expect(router.currentRoute.value.name).toBe('forbidden')
+    })
+    expect(router.currentRoute.value.query.from).toBe('/users?tab=1')
   })
 })

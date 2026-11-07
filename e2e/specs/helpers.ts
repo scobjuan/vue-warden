@@ -24,3 +24,10 @@ export function trackRequests(page: Page): string[] {
   })
   return keys
 }
+
+/** Collects uncaught page errors so tests can assert the app never crashes. */
+export function trackPageErrors(page: Page): string[] {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  return errors
+}

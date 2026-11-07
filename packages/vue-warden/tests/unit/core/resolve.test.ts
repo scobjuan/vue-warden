@@ -60,3 +60,40 @@ describe('resolveInput', () => {
     expect(resolveInput(undefined, 'x', 'y', 'deny').view).toBe(false)
   })
 })
+
+describe('resolve edge cases', () => {
+  it('splitKey keeps an empty component or input intact', () => {
+    expect(splitKey('')).toEqual(['', ''])
+    expect(splitKey('a.')).toEqual(['a', ''])
+    expect(splitKey('.b')).toEqual(['', 'b'])
+  })
+
+  it('denies a closed page regardless of the missing policy', () => {
+    expect(resolveComponent(closed, 'unknown', 'allow')).toBe(false)
+    expect(resolveInput(closed, 'unknown', 'x', 'allow')).toEqual({
+      view: false,
+      edit: false
+    })
+    expect(resolveInput(closed, 'filter', '', 'allow').view).toBe(false)
+  })
+
+  it('denies an empty input key of a denied component', () => {
+    expect(resolveInput(page, 'billing', '', 'allow').view).toBe(false)
+  })
+
+  it('does not let the missing policy override an explicit deny', () => {
+    expect(resolveInput(page, 'filter', 'password', 'allow')).toEqual({
+      view: false,
+      edit: false
+    })
+    expect(resolveComponent(page, 'billing', 'allow')).toBe(false)
+  })
+
+  it('returns frozen permissions that cannot be mutated', () => {
+    const denied = resolveInput(undefined, 'x', 'y', 'deny')
+    const allowed = resolveInput(undefined, 'x', 'y', 'allow')
+    expect(Object.isFrozen(denied)).toBe(true)
+    expect(Object.isFrozen(allowed)).toBe(true)
+    expect(allowed).toEqual({ view: true, edit: true })
+  })
+})

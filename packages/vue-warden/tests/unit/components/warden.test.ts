@@ -1,8 +1,8 @@
-import { flushPromises } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 
-import { rawPage } from '../../fixtures'
+import { Warden } from '../../../src/components/warden'
 import { mountWith, readyWarden } from '../../helpers'
 
 const body = (key: string, extra: Record<string, unknown> = {}) =>
@@ -97,7 +97,121 @@ describe('<Warden>', () => {
     expect(wrapper.find('#ok').exists()).toBe(false)
   })
 
-  it('reports a stable page for the sample payload', () => {
-    expect(rawPage.components).toHaveLength(2)
+  it('does not notify onDenied or render the slot when allowed', async () => {
+    const onDenied = vi.fn()
+    const wrapper = mountWith(await readyWarden({ onDenied }), body('filter'))
+    expect(onDenied).not.toHaveBeenCalled()
+    expect(wrapper.find('#slot').exists()).toBe(false)
+  })
+
+  it('notifies onDenied once per denial, not on every render', async () => {
+    const onDenied = vi.fn()
+    const warden = await readyWarden({ onDenied })
+    mountWith(warden, body('billing'))
+    warden.store.pages.set('unrelated', warden.store.pages.get('users')!)
+    await flushPromises()
+    expect(onDenied).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not notify onDenied while an explicit route is loading', async () => {
+    const onDenied = vi.fn()
+    mountWith(
+      await readyWarden({ onDenied }),
+      defineComponent({
+        template: '<Warden component-key="filter" route="other"><p /></Warden>'
+      })
+    )
+    await flushPromises()
+    expect(onDenied).not.toHaveBeenCalled()
+  })
+
+  it('notifies onDenied and swaps the UI when access is revoked later', async () => {
+    const onDenied = vi.fn()
+    const warden = await readyWarden({ onDenied })
+    const wrapper = mountWith(warden, body('filter'))
+    warden.store.pages.set(
+      'users',
+      Object.freeze({
+        ...warden.store.pages.get('users')!,
+        components: new Map([['filter', { access: false, inputs: new Map() }]])
+      })
+    )
+    await flushPromises()
+    expect(wrapper.find('#ok').exists()).toBe(false)
+    expect(wrapper.find('#slot').text()).toBe('component:filter')
+    expect(onDenied).toHaveBeenCalledOnce()
+  })
+
+  it('shows the content again when access is granted later', async () => {
+    const warden = await readyWarden()
+    const wrapper = mountWith(warden, body('billing'))
+    expect(wrapper.find('#ok').exists()).toBe(false)
+    warden.store.pages.set(
+      'users',
+      Object.freeze({
+        ...warden.store.pages.get('users')!,
+        components: new Map([['billing', { access: true, inputs: new Map() }]])
+      })
+    )
+    await flushPromises()
+    expect(wrapper.find('#ok').exists()).toBe(true)
+    expect(wrapper.find('#slot').exists()).toBe(false)
+  })
+
+  it('prefers the #denied slot over the global deniedComponent', async () => {
+    const Global = defineComponent({ render: () => h('b', { id: 'global' }) })
+    const wrapper = mountWith(
+      await readyWarden({ deniedComponent: Global }),
+      body('billing')
+    )
+    expect(wrapper.find('#slot').exists()).toBe(true)
+    expect(wrapper.find('#global').exists()).toBe(false)
+  })
+
+  it('denies every component when the page itself is denied', async () => {
+    const wrapper = mountWith(
+      await readyWarden(
+        { onMissing: 'allow' },
+        { key: 'users', can_access: false, components: [] }
+      ),
+      body('filter')
+    )
+    expect(wrapper.find('#ok').exists()).toBe(false)
+  })
+
+  it('renders the wrapper with the requested tag and route attributes', async () => {
+    const wrapper = mountWith(
+      await readyWarden(),
+      defineComponent({
+        template:
+          '<Warden component-key="filter" route="users" as="section"><p /></Warden>'
+      })
+    )
+    await flushPromises()
+    const el = wrapper.find('section')
+    expect(el.attributes('data-warden-component')).toBe('filter')
+    expect(el.attributes('data-warden-route')).toBe('users')
+    expect(el.attributes('style')).toContain('display: contents')
+  })
+
+  it('keeps the wrapper in the DOM when denied and silent', async () => {
+    const wrapper = mountWith(
+      await readyWarden(),
+      body('billing', { silent: true })
+    )
+    const el = wrapper.find('[data-warden-component="billing"]')
+    expect(el.exists()).toBe(true)
+    expect(el.element.children).toHaveLength(0)
+  })
+
+  it('fails closed with a clear error when the plugin is missing', () => {
+    expect(() =>
+      mount(
+        defineComponent({
+          template: '<Warden component-key="x" />'
+        }),
+        { global: { components: { Warden } } }
+      )
+    ).toThrow(/install the plugin/)
   })
 })
