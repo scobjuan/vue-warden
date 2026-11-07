@@ -35,10 +35,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint && pnpm typecheck && pnpm test:coverage
       - run: pnpm build
+      # Trusted publishing: npm exchanges the GitHub OIDC token for a
+      # short-lived publish credential, so no npm token is stored.
       - run: pnpm --filter vue-warden publish --access public --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
