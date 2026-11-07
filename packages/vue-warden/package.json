@@ -9,6 +9,10 @@
     "url": "git+https://github.com/scobjuan/vue-warden.git",
     "directory": "packages/vue-warden"
   },
+  "homepage": "https://github.com/scobjuan/vue-warden#readme",
+  "bugs": {
+    "url": "https://github.com/scobjuan/vue-warden/issues"
+  },
   "keywords": [
     "vue",
     "vue3",
