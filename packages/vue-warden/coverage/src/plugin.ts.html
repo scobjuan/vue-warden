@@ -36,7 +36,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
@@ -57,7 +57,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -140,7 +140,13 @@
 <a name='L64'></a><a href='#L64'>64</a>
 <a name='L65'></a><a href='#L65'>65</a>
 <a name='L66'></a><a href='#L66'>66</a>
-<a name='L67'></a><a href='#L67'>67</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -166,7 +172,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -174,18 +179,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">43x</span>
+<span class="cline-any cline-yes">43x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">43x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -198,16 +206,24 @@
 <span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">43x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { App, InjectionKey } from 'vue'
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { App } from 'vue'
 &nbsp;
+import { Warden as WardenComponent } from './components/warden'
+import { WardenField } from './components/warden-field'
+import { WardenGate } from './components/warden-gate'
+import { WARDEN_KEY } from './context'
 import { resolveOptions } from './core/options'
 import { safe } from './core/safe'
 import { createStore, type WardenStore } from './core/store'
@@ -217,10 +233,11 @@ import type {
   RouterLike,
   WardenOptions
 } from './core/types'
+import { createDirective } from './directive/v-warden'
 import { installGuard } from './router/guard'
 &nbsp;
 /** Public instance returned by `createWarden`. */
-export interface Warden {
+export interface WardenInstance {
   readonly store: WardenStore
   readonly options: ResolvedOptions
   /** Vue plugin entry point. */
@@ -231,21 +248,18 @@ export interface Warden {
   deny: (ctx: DeniedContext) =&gt; void
 }
 &nbsp;
-/** Injection key of the active Warden instance. */
-export const WARDEN_KEY: InjectionKey&lt;Warden&gt; = Symbol('vue-warden')
-&nbsp;
 /**
  * Creates a Warden instance. State lives in the instance, so it is SSR-safe.
  * @param userOptions - Package options.
  * @returns The Warden plugin instance.
  */
-export function createWarden(userOptions: WardenOptions): Warden {
+export function createWarden(userOptions: WardenOptions): WardenInstance {
   const options = resolveOptions(userOptions)
   const store = createStore(options)
   let removeGuard: (() =&gt; void) | undefined
   let attached: RouterLike | undefined
 &nbsp;
-  const warden: Warden = {
+  const warden: WardenInstance = {
     store,
     options,
     deny: (ctx) =&gt; {
@@ -265,6 +279,10 @@ export function createWarden(userOptions: WardenOptions): Warden {
     },
     install: (app) =&gt; {
       app.provide(WARDEN_KEY, warden)
+      app.component('Warden', WardenComponent)
+      app.component('WardenField', WardenField)
+      app.component('WardenGate', WardenGate)
+      app.directive('warden', createDirective(warden))
       const router = (app.config.globalProperties as { $router?: RouterLike })
         .$router
       if (router) warden.attachRouter(router)
@@ -279,7 +297,7 @@ export function createWarden(userOptions: WardenOptions): Warden {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-11-07T20:43:24.575Z
+                at 2026-11-07T20:47:17.270Z
             </div>
         <script src="../prettify.js"></script>
         <script>

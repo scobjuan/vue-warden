@@ -9,7 +9,7 @@ import type { DeniedContext, DeniedKind } from './types'
 export function deniedContext(kind: DeniedKind, key: string): DeniedContext {
   return {
     kind,
-    key,
+    target: key,
     message: `You do not have permission to access this ${kind}.`
   }
 }

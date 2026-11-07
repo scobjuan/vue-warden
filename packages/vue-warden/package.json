@@ -36,7 +36,7 @@
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && cp src/styles/denied.css dist/style.css",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

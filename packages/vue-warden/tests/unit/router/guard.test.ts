@@ -93,7 +93,7 @@ describe('navigation guard', () => {
     expect(router.currentRoute.value.name).toBe('forbidden')
     expect(router.currentRoute.value.query.from).toBe('/users')
     expect(onDenied).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'page', key: 'users' })
+      expect.objectContaining({ kind: 'page', target: 'users' })
     )
   })
 
@@ -158,7 +158,7 @@ describe('createWarden', () => {
       onError
     })
     expect(() => {
-      warden.deny({ kind: 'page', key: 'k', message: 'm' })
+      warden.deny({ kind: 'page', target: 'k', message: 'm' })
     }).not.toThrow()
     expect(onError).toHaveBeenCalled()
   })

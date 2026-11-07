@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  resolve: { alias: { vue: 'vue/dist/vue.esm-bundler.js' } },
   test: {
     environment: 'happy-dom',
     include: ['tests/**/*.test.ts'],

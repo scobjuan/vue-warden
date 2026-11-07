@@ -6,6 +6,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   platform: 'neutral',
-  external: ['vue', 'vue-router'],
+  deps: { neverBundle: ['vue', 'vue-router'] },
   minify: true
 })

@@ -49,7 +49,7 @@ export type DeniedKind = 'page' | 'component' | 'input'
 export interface DeniedContext {
   kind: DeniedKind
   /** Page key, component key or `component.input` key. */
-  key: string
+  target: string
   /** Human readable message. */
   message: string
 }
