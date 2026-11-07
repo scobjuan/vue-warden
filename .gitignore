@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output
+.nuxt
+.output
+coverage
+playwright-report
+test-results
