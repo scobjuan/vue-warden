@@ -4,21 +4,19 @@ Updated: 2026-11-07
 
 ## Current state (max 20)
 
-- Refactor v1 implemented on branch `refactor/v1` (plan: `.agents/plans/2026-11-refactor.md`).
-- Package `vue-warden` 0.1.0 in `packages/vue-warden`: core, guard, components, directive, composable.
-- 196 unit tests (>=95% coverage), 25 Playwright e2e (+1 fixme) on `examples/vite-vue`.
-- Examples built: vite-vue (e2e target), quasar, vuetify, nuxt (SSR).
-- Docs: README + `docs/*.md`; screenshots generated into `docs/images`.
-- CI (`ci.yml`) and release-please (`release.yml`) written but never run on GitHub.
-- NOT pushed yet; waiting for owner approval to push and open the PR.
+- `vue-warden@0.1.0` published on npm (repo is public) via release-please + GitHub Actions.
+- Package in `packages/vue-warden`: core, guard, components, directive, composable.
+- 196 unit tests, 25 Playwright e2e on `examples/vite-vue`; CI green on `main`.
+- Examples: vite-vue (e2e target), quasar, vuetify, nuxt (SSR); only vite-vue has e2e.
+- Publishing moves to npm trusted publishing (OIDC); `NPM_TOKEN` is being retired.
+- Releases: merge conventional commits to `main`, then merge the release-please PR.
 
 ## Direction / next steps (max 20)
 
-- [ ] Owner: add secrets `NPM_TOKEN` and `RELEASE_TOKEN` (personal PAT) in GitHub.
-- [ ] Push `refactor/v1`, open PR, confirm CI is green (first CI run is untested).
-- [ ] Fix `examples/vite-vue` Users.vue: `alert` is not exposed in templates (`i.alert is not a function`); then enable the `test.fixme` export test in `e2e/specs/roles.spec.ts`.
-- [ ] Smoke-test quasar/vuetify/nuxt examples in a browser (only built, not e2e-tested).
-- [ ] Optional: Nuxt module, `v-warden` SSR props, per-instance `AbortController` on superseded navigations.
+- [ ] Owner: configure the trusted publisher on npm, then verify the next release publishes without a token.
+- [ ] After that release succeeds: delete the `NPM_TOKEN` secret and revoke the token on npm.
+- [ ] Smoke-test quasar/vuetify/nuxt examples in a browser.
+- [ ] Optional: Nuxt module, `v-warden` SSR props, abort on superseded navigations.
 
 ## Existing utilities - USE, do not duplicate (max 60)
 
@@ -58,6 +56,9 @@ Updated: 2026-11-07
 - Vitest needs alias `vue` -> `vue/dist/vue.esm-bundler.js` to mount string templates.
 - vue-router does not encode `/` in query values (`?from=/billing`).
 - Playwright `page.clock.install()` + `fastForward` makes SWR expiry testable.
+- release-please from `0.0.0` jumps to 1.0.0: force a version with a `Release-As: x.y.z` commit footer.
+- npm rejects provenance from private repos; the repo must stay public.
+- npm registry views lag a minute after publish (a `0.0.0-stage` stub is normal).
 - Examples consume the built `dist` of the package: run `pnpm build` first.
 - Test pitfalls: `<Warden>` unmounts children when denied (query them outside it); a revocation test must not deny the other routes too.
 - eslint-plugin-prettier + `no-confusing-void-expression`: use braces in arrow callbacks.
@@ -68,3 +69,4 @@ Updated: 2026-11-07
 - 2026-11-07 Monorepo: pnpm workspaces, tsdown, vitest, size-limit, ESLint, husky hooks.
 - 2026-11-07 Core, guard/plugin, components/directive/composable with unit tests.
 - 2026-11-07 Examples (4), Playwright e2e + screenshots, README and docs, CI and release workflows.
+- 2026-11-07 First release 0.1.0 published; publish job moved to OIDC trusted publishing.

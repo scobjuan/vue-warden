@@ -124,7 +124,7 @@ Sections with line caps: Current state (<=20), Direction / next steps (<=20), Ex
 
 ## User actions required
 
-- Create npm token + GitHub PAT, add secrets `NPM_TOKEN`, `RELEASE_TOKEN`.
+- Add the `RELEASE_TOKEN` secret (personal PAT) and configure the npm trusted publisher (no npm token).
 - Install deps when asked (pnpm available; Playwright browsers download).
 
 ## Implementation notes (deviations from the plan)
