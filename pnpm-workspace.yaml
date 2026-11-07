@@ -1,0 +1,7 @@
+packages:
+  - packages/*
+  - examples/*
+  - e2e
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': false

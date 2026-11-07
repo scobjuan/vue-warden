@@ -1,0 +1,40 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1d2939;
+}
+body {
+  margin: 0;
+  background: #f9fafb;
+}
+.bar {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid #eaecf0;
+}
+nav {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+main {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+}
+.denied {
+  background: #fef3f2;
+  border-color: #fda29b;
+}

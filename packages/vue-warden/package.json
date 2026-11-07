@@ -1,0 +1,69 @@
+{
+  "name": "vue-warden",
+  "version": "0.0.0",
+  "description": "Declarative, backend-driven access control for Vue 3: hide, disable or block pages, components and inputs without writing conditionals.",
+  "license": "MIT",
+  "author": "Juan A. Escobar <scobjuan@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scobjuan/vue-warden.git",
+    "directory": "packages/vue-warden"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "permissions",
+    "access-control",
+    "rbac",
+    "authorization",
+    "vue-router"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "scripts": {
+    "build": "tsdown && cp src/styles/denied.css dist/style.css",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "size": "size-limit"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "@vitest/coverage-v8": "^5.1.0",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^21.0.4",
+    "size-limit": "^14.3.0",
+    "tsdown": "^0.23.7",
+    "vitest": "^5.1.0",
+    "vue": "^3.5.26",
+    "vue-router": "^4.5.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

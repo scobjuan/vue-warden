@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bump-minor-pre-major": true,
+  "packages": {
+    "packages/vue-warden": {
+      "release-type": "node",
+      "package-name": "vue-warden",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
