@@ -126,3 +126,12 @@ Sections with line caps: Current state (<=20), Direction / next steps (<=20), Ex
 
 - Create npm token + GitHub PAT, add secrets `NPM_TOKEN`, `RELEASE_TOKEN`.
 - Install deps when asked (pnpm available; Playwright browsers download).
+
+## Implementation notes (deviations from the plan)
+
+- Directive hides with `display: none` (nodes cannot be removed from a directive); `WardenField`/`Warden` remove nodes.
+- `WardenGate` added to render the denied UI for pages when no `forbiddenRoute` redirect is used.
+- Directive finds its section through a `display: contents` wrapper rendered by `Warden`.
+- `DeniedContext` uses `target` (`key` is a reserved Vue prop); the instance type is `WardenInstance`.
+- AbortController is used for request timeouts only, not for superseded navigations.
+- Dev-only warnings were dropped (no `__DEV__`); option validation throws early instead.
