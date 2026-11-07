@@ -75,6 +75,25 @@ describe('store.load', () => {
     expect(store.pages.get('users')?.access).toBe(false)
   })
 
+  it('does not fire onRevoked for pages that are not current', async () => {
+    let access = true
+    const { store } = make({
+      ttl: 0,
+      fetchPermissions: () =>
+        Promise.resolve({ ...rawPage, can_access: access })
+    })
+    const onRevoked = vi.fn()
+    store.onRevoked = onRevoked
+    store.current.value = 'other'
+    await store.load('users')
+    access = false
+    await store.load('users')
+    await vi.waitFor(() => {
+      expect(store.pages.get('users')?.access).toBe(false)
+    })
+    expect(onRevoked).not.toHaveBeenCalled()
+  })
+
   it('denies and reports when the first load fails', async () => {
     const onError = vi.fn()
     const { store } = make({

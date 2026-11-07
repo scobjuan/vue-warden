@@ -104,3 +104,23 @@ export interface ResolvedOptions extends WardenOptions {
   protect: 'all' | 'marked'
   disabledClass: string
 }
+
+/** Minimal route shape used by the guard (structurally compatible with vue-router). */
+export interface RouteLike {
+  name?: string | symbol | null
+  path: string
+  fullPath: string
+  meta?: Record<string | symbol, unknown>
+}
+
+/** Minimal router shape (structurally compatible with vue-router 4). */
+export interface RouterLike {
+  beforeEach: (guard: (to: RouteLike, from: RouteLike) => unknown) => () => void
+  replace: (to: {
+    name?: string
+    path?: string
+    query?: Record<string, string>
+  }) => unknown
+  currentRoute: { value: RouteLike }
+  hasRoute: (name: string) => boolean
+}
