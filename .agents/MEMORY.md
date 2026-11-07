@@ -59,7 +59,7 @@ Updated: 2026-11-07
 - Playwright `page.clock.install()` + `fastForward` makes SWR expiry testable.
 - Examples consume the built `dist` of the package: run `pnpm build` first.
 - eslint-plugin-prettier + `no-confusing-void-expression`: use braces in arrow callbacks.
-- Local `CLAUDE.md` (`@AGENTS.md`) is git-excluded via `.git/info/exclude`; do not version it.
+- Tool-specific entry files that only point to `AGENTS.md` stay local, excluded via `.git/info/exclude`; never version them.
 
 ## Recent changes (max 30)
 

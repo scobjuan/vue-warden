@@ -36,7 +36,7 @@ Goal: a rewrite that is correct, near-zero overhead, fault-tolerant (never throw
 | Tooling                 | pnpm workspaces (drop yarn.lock), tsdown build (ESM + d.ts), size-limit < 4 KB gzip core                                                                                                             |
 | Releases                | release-please + GitHub Actions, npm provenance, using user PAT secret `RELEASE_TOKEN` so everything is authored by the user                                                                         |
 | Agent files             | `AGENTS.md` (root), `.agents/RULES.md`, `.agents/MEMORY.md` (<=250 lines), `.agents/plans/`                                                                                                          |
-| CLAUDE.md               | Not versioned; local `CLAUDE.md` with `@AGENTS.md`, listed in `.git/info/exclude`                                                                                                                    |
+| Tool entry files        | Not versioned; local pointer file to `AGENTS.md`, listed in `.git/info/exclude`                                                                                                                      |
 | Language                | English everywhere (code, docs, agent files, commits)                                                                                                                                                |
 | Docs                    | Concise README + `docs/*.md` per topic                                                                                                                                                               |
 | Git                     | Branch `refactor/v1`, one conventional commit per step, push + PR at end; author = Juan A. Escobar; NO `Co-Authored-By`, no agent mentions anywhere (user instruction overrides default attribution) |
@@ -87,7 +87,7 @@ vue-warden/
 
 ## RULES.md content (enforced where possible)
 
-Conventional commits (commitlint), semver (release-please), single quotes / no semicolons / 2-space indent / no trailing commas (Prettier, existing `.prettierrc.json`), no emojis outside allowed commit types, no references to AI agents or Claude in code/commits/PRs/git metadata (author = user, no Co-Authored-By), strict TS + `no-explicit-any` + JSDoc on exports (ESLint), kebab-case files / PascalCase components / named exports / sorted imports (ESLint), tests required for `src/` changes + coverage >=90%, size budget < 4 KB gzip (size-limit in CI), zero runtime deps. Hooks: pre-commit = lint-staged + typecheck + `memory:check`; commit-msg = commitlint; pre-push = unit tests.
+Conventional commits (commitlint), semver (release-please), single quotes / no semicolons / 2-space indent / no trailing commas (Prettier, existing `.prettierrc.json`), no emojis outside allowed commit types, no references to AI agents or tools in code/commits/PRs/git metadata (author = user, no Co-Authored-By), strict TS + `no-explicit-any` + JSDoc on exports (ESLint), kebab-case files / PascalCase components / named exports / sorted imports (ESLint), tests required for `src/` changes + coverage >=90%, size budget < 4 KB gzip (size-limit in CI), zero runtime deps. Hooks: pre-commit = lint-staged + typecheck + `memory:check`; commit-msg = commitlint; pre-push = unit tests.
 
 ## AGENTS.md (short entry point)
 
@@ -104,7 +104,7 @@ Sections with line caps: Current state (<=20), Direction / next steps (<=20), Ex
 ## Execution phases (each = 1+ conventional commits on `refactor/v1`)
 
 1. `chore`: pnpm workspace, move package to `packages/vue-warden`, remove yarn.lock / axios.d.ts / old types deps, tsdown, vitest, size-limit, ESLint (add vue, import sort, naming rules), husky + lint-staged; copy plan to `.agents/plans/`.
-2. `docs`: AGENTS.md, `.agents/RULES.md`, initial `.agents/MEMORY.md`; local CLAUDE.md + `.git/info/exclude`.
+2. `docs`: AGENTS.md, `.agents/RULES.md`, initial `.agents/MEMORY.md`; local (git-excluded) pointer file to AGENTS.md.
 3. `feat`: core (types, options, normalize, cache, store, resolve, safe) + unit tests.
 4. `feat`: router guard + plugin `createWarden` + tests.
 5. `feat`: `<Warden>`, `v-warden`, `<WardenField>`, default `<WardenDenied>` + CSS, `useWarden` + tests.
