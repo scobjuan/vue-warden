@@ -5,6 +5,12 @@ import { useWarden } from 'vue-warden'
 const { guard, can } = useWarden()
 const saved = ref(false)
 
+function exportUsers(): void {
+  guard('new-user.save', () => {
+    window.alert('exported')
+  })
+}
+
 function save(): void {
   guard('new-user.save', () => {
     saved.value = true
@@ -46,10 +52,7 @@ function save(): void {
     </template>
   </Warden>
 
-  <button
-    data-testid="export"
-    @click="guard('new-user.save', () => alert('exported'))"
-  >
+  <button data-testid="export" @click="exportUsers">
     Export (needs new-user.save) {{ can('new-user.save') ? '' : '- blocked' }}
   </button>
 </template>

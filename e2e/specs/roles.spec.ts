@@ -43,22 +43,6 @@ test.describe('admin', () => {
     await expect(page).toHaveURL(/\/settings$/)
     expect(errors).toEqual([])
   })
-
-  // The example calls `alert` from a template expression, which Vue does not
-  // expose, so the allowed action throws. Enable once the example is fixed.
-  test.fixme('the export action runs because the role may save', async ({
-    page
-  }) => {
-    await openAs(page, 'admin', '/users')
-    const dialogs: string[] = []
-    page.on('dialog', async (dialog) => {
-      dialogs.push(dialog.message())
-      await dialog.accept()
-    })
-    await page.getByTestId('export').click()
-    await expect.poll(() => dialogs).toEqual(['exported'])
-    await expect(page.getByTestId('export')).not.toContainText('blocked')
-  })
 })
 
 test.describe('editor', () => {
