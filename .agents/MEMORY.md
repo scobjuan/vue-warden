@@ -4,17 +4,15 @@ Updated: 2026-11-07
 
 ## Current state (max 20)
 
-- `vue-warden@0.1.0` published on npm (repo is public) via release-please + GitHub Actions.
+- `vue-warden@0.1.1` published on npm (repo is public) via release-please + GitHub Actions.
 - Package in `packages/vue-warden`: core, guard, components, directive, composable.
 - 196 unit tests, 25 Playwright e2e on `examples/vite-vue`; CI green on `main`.
 - Examples: vite-vue (e2e target), quasar, vuetify, nuxt (SSR); only vite-vue has e2e.
-- Publishing moves to npm trusted publishing (OIDC); `NPM_TOKEN` is being retired.
+- Publishing uses npm trusted publishing (OIDC, workflow `release.yml`); no npm token exists.
 - Releases: merge conventional commits to `main`, then merge the release-please PR.
 
 ## Direction / next steps (max 20)
 
-- [ ] Owner: configure the trusted publisher on npm, then verify the next release publishes without a token.
-- [ ] After that release succeeds: delete the `NPM_TOKEN` secret and revoke the token on npm.
 - [ ] Smoke-test quasar/vuetify/nuxt examples in a browser.
 - [ ] Optional: Nuxt module, `v-warden` SSR props, abort on superseded navigations.
 
@@ -59,6 +57,7 @@ Updated: 2026-11-07
 - release-please from `0.0.0` jumps to 1.0.0: force a version with a `Release-As: x.y.z` commit footer.
 - npm rejects provenance from private repos; the repo must stay public.
 - npm registry views lag a minute after publish (a `0.0.0-stage` stub is normal).
+- The trusted publisher must be validated by one real publish within 48h of configuring it.
 - Examples consume the built `dist` of the package: run `pnpm build` first.
 - Test pitfalls: `<Warden>` unmounts children when denied (query them outside it); a revocation test must not deny the other routes too.
 - eslint-plugin-prettier + `no-confusing-void-expression`: use braces in arrow callbacks.
@@ -69,4 +68,4 @@ Updated: 2026-11-07
 - 2026-11-07 Monorepo: pnpm workspaces, tsdown, vitest, size-limit, ESLint, husky hooks.
 - 2026-11-07 Core, guard/plugin, components/directive/composable with unit tests.
 - 2026-11-07 Examples (4), Playwright e2e + screenshots, README and docs, CI and release workflows.
-- 2026-11-07 First release 0.1.0 published; publish job moved to OIDC trusted publishing.
+- 2026-11-07 First release 0.1.0 published; 0.1.1 validated OIDC trusted publishing; `NPM_TOKEN` removed.
