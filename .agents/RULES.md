@@ -34,7 +34,6 @@ Rules marked (enforced) are checked by tooling; the rest are checked in review.
   created by `createWarden()` so the package is SSR-safe.
 - User callbacks (`fetchPermissions`, `transform`, `onDenied`, `onError`) must
   always run through `core/safe.ts`. The package never throws into the host app.
-- Dev-only warnings are guarded by `__DEV__` so they are stripped in production.
 
 ## Quality
 
