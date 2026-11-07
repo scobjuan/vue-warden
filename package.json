@@ -1,30 +1,40 @@
 {
-  "name": "vue-access-control",
+  "name": "vue-warden-monorepo",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@12.16.1",
   "scripts": {
-    "dev": "vite",
-    "lint": "eslint --ext .js,.ts .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "pnpm -r --filter ./packages/* typecheck",
+    "test": "pnpm --filter vue-warden test",
+    "test:coverage": "pnpm --filter vue-warden test:coverage",
+    "test:e2e": "pnpm --filter e2e test",
+    "build": "pnpm --filter vue-warden build",
+    "size": "pnpm --filter vue-warden size",
+    "screenshots": "pnpm --filter e2e screenshots",
+    "memory:check": "node scripts/memory-check.mjs",
     "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,vue,js,mjs}": "eslint --fix",
+    "*.{ts,vue,js,mjs,json,md,yml,yaml,css}": "prettier --write"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.3.0",
     "@commitlint/config-conventional": "^20.3.0",
     "@eslint/js": "^9.39.2",
-    "@types/vue-router": "^2.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsdoc": "^61.5.0",
     "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-vue": "^10.12.0",
     "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.7.4",
-    "typescript": "^5.9.3",
+    "typescript": "~5.9.3",
     "typescript-eslint": "^8.51.0",
-    "vite": "^7.2.4",
-    "vue": "^3.5.26"
+    "vue-eslint-parser": "^10.4.2"
   }
 }

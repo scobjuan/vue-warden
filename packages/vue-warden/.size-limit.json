@@ -1,0 +1,9 @@
+[
+  {
+    "name": "vue-warden (core, excluding vue)",
+    "path": "dist/index.js",
+    "import": "*",
+    "limit": "4 KB",
+    "ignore": ["vue", "vue-router"]
+  }
+]
